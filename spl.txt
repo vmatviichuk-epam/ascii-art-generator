@@ -1,0 +1,7 @@
+sourcetype="complex_query"   
+| eval ticket_end_time = if(actionCode=="D",strptime(actionTime,"%Y/%m/%d %H:%M:%S"),NULL)   
+| eval ticket_start_time = if(actionCode=="I",strptime(firstOccurrence,"%Y/%m/%d %H:%M:%S"),NULL)   
+| transaction serverName serverSerial ticketNumber   
+| eval ticketDuration = ticket_end_time - ticket_start_time   
+| eval pretty_ticketDuration = floor(ticketDuration/60/60)." Hours ".floor(floor(ticketDuration - (floor(ticketDuration/60/60)*60*60))/60)." Min ".floor(ticketDuration%60)." Sec."   
+| stats avg(ticketDuration) AS Average_Ticket_Duration list(pretty_ticketDuration) AS pretty_ticketDuration by serverName serverSerial 
