@@ -10,8 +10,8 @@ A simple GUI application that creates ASCII art and allows exporting it as image
   - PNG (high-quality lossless)
   - JPEG (compressed)
   - PDF (vector format)
-- User-friendly interface
-- Monospaced font display
+- User-friendly interface with consistent black/white/red color scheme
+- Monospaced font display with adjustable size (8-20pt)
 
 ## Requirements
 
@@ -29,22 +29,27 @@ A simple GUI application that creates ASCII art and allows exporting it as image
 
 ## Usage
 
-Run the application with:
-```
-python ascii_converter.py
-```
-
-Or on macOS, use the provided shell script:
+Run the application using sh:
 ```
 sh run_ascii_converter.sh
 ```
 
+## Application Usage
+
 1. Enter text in the input box
 2. Choose a pattern character (default is *)
-3. The ASCII art will be generated automatically
-4. Select your preferred export format (PNG, JPG, or PDF)
-5. Click "Export as Image" to save your artwork
-6. Use "Clear" to start over
+3. Adjust font size using the slider if needed (8-20pt)
+4. The ASCII art will be generated automatically
+5. Select your preferred export format (PNG, JPG, or PDF)
+6. Click "Export as Image" to save your artwork
+7. Use "Clear" to start over
+
+## Design Guidelines
+
+- Strict color scheme: black (#000000), white (#FFFFFF), and red (#FF0000)
+- Special characters in exported images are highlighted in red
+- Consistent monospaced font (Courier) for ASCII art display
+- Clean, minimal interface with optimized spacing
 
 ## License
 

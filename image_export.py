@@ -7,10 +7,10 @@ import os
 from pathlib import Path
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
+from constants import COLORS
 
 
-def ascii_to_image(ascii_lines, pattern_char, font_size=12, padding=5, 
-                   bg_color=(255, 255, 255), text_color=(0, 0, 0)):
+def ascii_to_image(ascii_lines, pattern_char, font_size=12, padding=5):
     """
     Convert ASCII art to an image.
     
@@ -19,8 +19,6 @@ def ascii_to_image(ascii_lines, pattern_char, font_size=12, padding=5,
         pattern_char (str): The character used for the ASCII art
         font_size (int): Size of the font (matches UI font size)
         padding (int): Padding around the text (matches UI padding)
-        bg_color (tuple): Background color as RGB (white)
-        text_color (tuple): Text color as RGB (black)
         
     Returns:
         PIL.Image: Generated image
@@ -48,7 +46,7 @@ def ascii_to_image(ascii_lines, pattern_char, font_size=12, padding=5,
     total_height = 0
     
     # Use temporary ImageDraw to calculate text dimensions
-    temp_img = Image.new('RGB', (1, 1), bg_color)
+    temp_img = Image.new('RGB', (1, 1), COLORS['bg'])
     temp_draw = ImageDraw.Draw(temp_img)
     
     for line in art_lines:
@@ -60,13 +58,15 @@ def ascii_to_image(ascii_lines, pattern_char, font_size=12, padding=5,
     img_width = max_width + (padding * 2)
     img_height = total_height + (padding * 2)
     
-    # Create the image
-    img = Image.new('RGB', (img_width, img_height), bg_color)
+    # Create the image with white background
+    img = Image.new('RGB', (img_width, img_height), COLORS['bg'])
     draw = ImageDraw.Draw(img)
     
-    # Draw the ASCII art
+    # Draw the ASCII art with special character coloring
     y_position = padding
     for line in art_lines:
+        # Use red color for special characters, black for regular text
+        text_color = COLORS['accent'] if any(c in '!?.,*#@$%&' for c in line) else COLORS['text']
         draw.text((padding, y_position), line, font=font, fill=text_color)
         _, _, _, line_height = draw.textbbox((padding, y_position), line, font=font)
         y_position = line_height

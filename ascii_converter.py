@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from ascii_art import ASCIIArt
 from image_export import save_ascii_art_image
+from constants import COLORS
 
 class ASCIIArtApp:
     def __init__(self, root):
@@ -16,41 +17,44 @@ class ASCIIArtApp:
         self.root.title("ASCII Art Creator")
         self.ascii_generator = ASCIIArt()
         
-        # Configure root window with compact dimensions
+        # Configure root window
         self.root.geometry("600x500")
         self.root.minsize(500, 400)
-        self.root.configure(bg='#FFFFFF')
+        self.root.configure(bg=COLORS['bg'])
         
         self.setup_styles()
         self.setup_ui()
         
     def setup_styles(self):
         style = ttk.Style()
-        style.configure(".", background='#FFFFFF')
+        style.configure(".", background=COLORS['bg'])
         
-        # Compact styling for frames and widgets
         style.configure("Card.TLabelframe", 
                     padding=6,
                     relief="solid",
                     borderwidth=1,
-                    background='#FFFFFF')
+                    background=COLORS['bg'])
+        
         style.configure("Card.TLabelframe.Label", 
                     font=('Helvetica', 11, 'bold'),
-                    foreground='#CC0000',
-                    background='#FFFFFF')
+                    foreground=COLORS['accent'],
+                    background=COLORS['bg'])
+                    
         style.configure("Main.TLabel",
                     font=('Helvetica', 10),
-                    background='#FFFFFF')
-        style.configure("Main.TEntry",
-                    padding=3)
+                    background=COLORS['bg'],
+                    foreground=COLORS['text'])
+                    
         style.configure("Action.TButton",
                     padding=(10, 5),
                     font=('Helvetica', 10))
+                    
         style.configure("Danger.TButton",
                     padding=(10, 5),
                     font=('Helvetica', 10))
+                    
         style.configure("Main.TFrame",
-                    background='#FFFFFF')
+                    background=COLORS['bg'])
         
     def setup_ui(self):
         # Main container with reduced padding
@@ -61,7 +65,7 @@ class ASCIIArtApp:
         title_label = ttk.Label(main_container,
                             text="ASCII Art Creator",
                             font=('Helvetica', 14, 'bold'),
-                            foreground='#CC0000',
+                            foreground=COLORS['accent'],
                             style="Main.TLabel")
         title_label.grid(row=0, column=0, pady=(0, 10), sticky="nw")
         
@@ -141,8 +145,8 @@ class ASCIIArtApp:
                                yscrollcommand=y_scrollbar.set,
                                relief="solid",
                                borderwidth=1,
-                               bg='#FFFFFF',
-                               fg='#000000')
+                               bg=COLORS['bg'],
+                               fg=COLORS['text'])
         self.art_display.pack(expand=True, fill=tk.BOTH, padx=2, pady=2)
         
         y_scrollbar.config(command=self.art_display.yview)
@@ -187,70 +191,66 @@ class ASCIIArtApp:
         display_frame.rowconfigure(0, weight=1)
             
     def update_art(self, event=None):
-        text = self.text_input.get()
-        pattern_char = self.pattern_input.get()[:1] or "*"  # Use first character or default to *
+        """Update the ASCII art display when text or pattern changes"""
+        text = self.text_input.get().strip()
+        pattern = self.pattern_input.get().strip()
         
-        if text:
-            art_lines, truncated = self.ascii_generator.generate_art(text, pattern_char)
-            self.art_display.delete(1.0, tk.END)
-            self.art_display.insert(tk.END, "\n".join(art_lines))
-            
-            if truncated:
-                self.art_display.insert(tk.END, "\n\nNote: Text was truncated to fit display")
-        else:
-            self.art_display.delete(1.0, tk.END)
-            
-    def export_image(self):
-        text = self.text_input.get()
         if not text:
-            messagebox.showwarning("Warning", "Please enter some text first!")
+            self.art_display.delete('1.0', tk.END)
             return
             
-        pattern_char = self.pattern_input.get()[:1] or "*"
-        art_lines = self.art_display.get(1.0, tk.END).splitlines()
+        if not pattern:
+            pattern = '*'
         
-        # Get selected format
-        format_ext = self.format_var.get()
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        default_filename = f"ascii_art_{timestamp}.{format_ext}"
+        # Generate and display ASCII art
+        ascii_art, truncated = self.ascii_generator.text_to_ascii(text, pattern)
+        self.art_display.delete('1.0', tk.END)
+        self.art_display.insert('1.0', '\n'.join(ascii_art))
         
-        # Configure file types with all supported formats
-        file_types = [
-            ("PNG files", "*.png"),
-            ("JPEG files", "*.jpg;*.jpeg"),
-            ("PDF files", "*.pdf"),
-            ("All files", "*.*")
+        if truncated:
+            self.art_display.insert(tk.END, "\n\n(Text truncated due to length)")
+            
+    def export_image(self):
+        """Export the current ASCII art as an image"""
+        if not self.art_display.get('1.0', tk.END).strip():
+            messagebox.showwarning("No Content", "Please create some ASCII art first!")
+            return
+            
+        # Get file types
+        filetypes = [
+            ('PNG Image', '*.png'),
+            ('JPEG Image', '*.jpg'),
+            ('PDF Document', '*.pdf')
         ]
         
-        # Set initial directory to Downloads
-        initial_dir = str(Path.home() / "Downloads")
-            
-        filename = filedialog.asksaveasfilename(
-            defaultextension=f".{format_ext}",
-            filetypes=file_types,
-            initialfile=default_filename,
-            initialdir=initial_dir,
-            title="Save ASCII Art"
+        file_path = filedialog.asksaveasfilename(
+            defaultextension='.png',
+            filetypes=filetypes,
+            title='Save ASCII Art As'
         )
         
-        if filename:
+        if file_path:
             try:
-                file_path = save_ascii_art_image(art_lines, pattern_char, filename)
-                messagebox.showinfo("Success", f"ASCII art saved as:\n{file_path}")
+                ascii_lines = self.art_display.get('1.0', tk.END).splitlines()
+                pattern = self.pattern_input.get().strip() or '*'
+                save_ascii_art_image(ascii_lines, pattern, filename=file_path)
+                messagebox.showinfo("Success", "ASCII art saved successfully!")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to save image: {str(e)}")
-            
+
     def clear_input(self):
+        """Clear all input fields and display"""
         self.text_input.delete(0, tk.END)
         self.pattern_input.delete(0, tk.END)
-        self.pattern_input.insert(0, "*")
-        self.art_display.delete(1.0, tk.END)
+        self.pattern_input.insert(0, '*')
+        self.art_display.delete('1.0', tk.END)
 
     def update_font_size(self, event=None):
-        # Update the font size of the ASCII art display
-        current_size = self.font_size_var.get()
-        self.art_display.configure(font=('Courier', current_size))
-        self.update_art()  # Refresh the display
+        """Update the font size of the ASCII art display"""
+        new_size = self.font_size_var.get()
+        self.art_display.configure(font=('Courier', new_size))
+        # Trigger art update to maintain proper formatting
+        self.update_art()
 
 if __name__ == "__main__":
     root = tk.Tk()
