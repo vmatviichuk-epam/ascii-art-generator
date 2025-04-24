@@ -5,7 +5,4 @@ __pycache__/
 *.class
 .pytest_cache/                                              
 .coverage
-.coverage.*
 htmlcov/
-coverage.xml
-*.cover

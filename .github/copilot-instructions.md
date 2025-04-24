@@ -5,3 +5,4 @@
 - always prefer using `sh` over making files executable when running shell scripts
 - color schema constants should be defined in a separate place and reused always via references.
 - when doing code review follow instructions in docs/code review instructions.md file 
+- when generatin unit tests follow instructions from another project which is located 1 level up in the directory structure and called thanksgiving-be-j. That project will contain docs/ folder with unit tests instructions.md file

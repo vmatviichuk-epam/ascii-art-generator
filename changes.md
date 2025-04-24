@@ -13,3 +13,4 @@
 [2025-03-25] Added error handling for image export and font loading
 [2025-03-25] Added input validation for ASCII art export
 [2025-04-15] Updated run script to support Python 3.13 with tkinter and improved virtual environment handling
+[2025-04-24] Added comprehensive unit tests for ASCIIArt class with 100% coverage
